@@ -1,76 +1,26 @@
-import React, {useState, useReducer} from 'react';
+import React, {useState} from 'react';
 import {  
   View,
   Text,  
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  FlatList, Alert
+  FlatList
 } from 'react-native';
 import Colors from './styles/Colors';
 
-import { sha256 } from 'react-native-sha256'
+
+
+import useMarketingList from './src/hooks/useMarketingList'
 
 
 
 const Main = () => {
 
-    //const initialState = []
-    const initialState = {
-        products: []
-    }
-
-    const reducer = (state, action) => {
-
-        switch(action.type){
-            case 'ADD':
-                
-                return {
-                    ...state,
-                    products: [...state.products, action.item]
-                }
-
-               // return [...state, action.item]
-            case 'REMOVE':
-                return {
-                    ...state,
-                    products : state.products.filter(item => {
-                        return item.id !== action.id
-                    })
-                }
-            case 'CHECK':
-                if( action.id === undefined){
-                    Alert.alert('Item Null')
-                }
-                else{
-                    return {
-                        ...state,
-                        products : state.products.map(item => {
-                            if(item.id === action.id){
-                                return {
-                                    ...item, check: !item.check
-                                }    
-                            }
-                            else{
-                                return item
-                            }
-                        })
-                    }
-                }
-            default:  
-                return state  
-        }
-    }
-
     const[textoItem, setTextoItem] = useState('');        
-    const[state, dispatch] = useReducer(reducer,initialState)
+    
+    const[state, addItem, checkItem, removeItem] = useMarketingList()
 
-
-/*   const data = [
-       {id: '1', title: 'Rice', check: false},
-       {id: '2', title: 'Flour', check: false},
-   ]  
-*/
 
   return (
       
@@ -89,14 +39,11 @@ const Main = () => {
             <TouchableOpacity 
                 style={styles.addButton}
                 onPress={ async ()  =>  {
-                    const hashId = await sha256(textoItem);
-                    dispatch({type: 'ADD', item: {
-                        id: hashId, 
-                        title:textoItem,
-                        check: false
-                    }})
+                    addItem(textoItem)
                     setTextoItem('')
-                }}>
+                }}
+                
+                >
                 <Text style={styles.addButtonText}>+</Text>
             </TouchableOpacity>
         </View>
@@ -108,27 +55,17 @@ const Main = () => {
                         <TouchableOpacity 
                         style={styles.itemCheckButton}
                         onPress= { () => {
-                                dispatch({
-                                    type: 'CHECK', 
-                                    id: item.id
-                                })
+                            checkItem(item.id)
                             }}>
                             <Text style={[styles.listItem, item.check ? styles.listItemChecked : '']}>{item.title}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.removeItem}
                             onPress={ () => {
-                                dispatch({
-                                    type: 'REMOVE', 
-                                    id: item.id
-                                })
+                                removeItem(item.id)
                             }}>
                             <Text style={styles.removeItemText}>Remove</Text>
                         </TouchableOpacity>
-                        
-
                     </View>    
-                    
-              
             )}
         />
         <View>
